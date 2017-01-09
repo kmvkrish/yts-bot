@@ -1,0 +1,29 @@
+{
+  "name": "yts-bot",
+  "version": "1.0.0",
+  "description": "Facebook Messenger Bot with nodeJS and node-yts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kmvkrish/yts-bot.git"
+  },
+  "keywords": [
+    "nodeJS",
+    "node-yts",
+    "Facebook-Messenger"
+  ],
+  "author": "Krishna Manoj Varanasi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kmvkrish/yts-bot/issues"
+  },
+  "homepage": "https://github.com/kmvkrish/yts-bot#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "request": "^2.79.0"
+  }
+}
