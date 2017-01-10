@@ -28,49 +28,6 @@ function sendTextMessage(sender, text) {
     })
 }
 
-function sendGenericMessage(sender) {
-	yts.getMovies().then((response) => {
-		var movies = response.body.data.movies;
-		var messageData = {
-			"attachment": {
-				"type": "template",
-				"payload": {
-					"template_type": "generic",
-					"elements": []
-				}
-			}
-		};
-		for(var i=0; i< movies.length; i++){
-			messageData.attachment.payload.elements.push({
-				"title": movies[i].title,
-				"image_url": movies[i].background_image,
-				"buttons": [
-					{
-						"type": "postback",
-						"title": "Click to select",
-						"payload": movies[i].id
-					}
-				]
-			});
-		}
-	    request({
-	        url: 'https://graph.facebook.com/v2.6/me/messages',
-	        qs: {access_token:token},
-	        method: 'POST',
-	        json: {
-	            recipient: {id:sender},
-	            message: messageData,
-	        }
-	    }, function(error, response, body) {
-	        if (error) {
-	            console.log('Error sending messages: ', error)
-	        } else if (response.body.error) {
-	            console.log('Error: ', response.body.error)
-	        }
-	    });
-	});
-}
-
 app.set('port', (process.env.PORT || 5000));
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -79,7 +36,7 @@ app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
     yts.getMovies(1, 2016, 40).then((response) => {
-    	console.log(response.body.data);
+    	res.send(response.body.data);
     });
 });
 
@@ -91,8 +48,12 @@ app.post('/webhook/', function (req, res) {
         if (event.message && event.message.text) {
             text = event.message.text
             if (text === 'List' || text == "list") {
-                sendGenericMessage(sender)
-                continue
+                yts.getMovies().then((response) => {
+                	var movies = response.body.data.movies;
+                	for(var i=0; i < movies.length; i++){
+                		sendTextMessage(sender, movies[i].url);
+                	}
+                });
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
