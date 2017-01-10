@@ -14,6 +14,8 @@ function handleMessage(sender, text){
 		yts.search(movieName).then((response) => {
 			sendTextMessage(sender, JSON.stringify(response.data));
 		});
+	}else{
+		sendTextMessage(sender, text + "\n did not match");
 	}
 }
 
