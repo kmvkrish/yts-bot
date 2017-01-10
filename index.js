@@ -7,6 +7,16 @@ var yts = require("./yts").yts;
 
 var token = "EAARms7g6rZAUBALWlSsazZCmL2mc8WZCHlfHNKPT2glmGS2aq5MGqfZAkUYDvdYYIZAw531L0FpHHvNhi38l8m13LHTWUKbp3CuLwUZAP1qn12dCinCPhBhQOkLYjl8UI5BgMtZANvsZAlCxEs777CUUoMGxDTX4sZCTWXEuKTcnzFgZDZD"
 
+function handleMessage(sender, text){
+	var pattern = new RegExp("search\s", "ig");
+	if(pattern.test(text.split("search ")[0])){
+		var moviename = text.split("search ")[1];
+		yts.search(movieName).then((response) => {
+			sendTextMessage(sender, JSON.stringify(response.data));
+		});
+	}
+}
+
 function sendTextMessage(sender, text) {
     messageData = {
         text:text
@@ -95,12 +105,8 @@ app.post('/webhook/', function (req, res) {
         event = req.body.entry[0].messaging[i]
         sender = event.sender.id
         if (event.message && event.message.text) {
-            text = event.message.text
-            if (text === 'Generic') {
-                sendGenericMessage(sender)
-                continue
-            }
-            sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+            text = event.message.text;
+            handleTextMessage(sender, text);
         }
         if (event.postback) {
             text = JSON.stringify(event.postback)
