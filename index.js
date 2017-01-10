@@ -15,7 +15,7 @@ function handleMessage(sender, text){
 			sendTextMessage(sender, JSON.stringify(response.data));
 		});
 	}else{
-		sendTextMessage(sender, text + "\n did not match");
+		sendTextMessage(sender, text);
 	}
 }
 
@@ -107,8 +107,8 @@ app.post('/webhook/', function (req, res) {
         event = req.body.entry[0].messaging[i]
         sender = event.sender.id
         if (event.message && event.message.text) {
-            text = event.message.text;
-            handleTextMessage(sender, text);
+            text = event.message.text
+            handleMessage(sender, text);
         }
         if (event.postback) {
             text = JSON.stringify(event.postback)
