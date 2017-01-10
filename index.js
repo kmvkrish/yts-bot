@@ -96,7 +96,6 @@ app.post('/webhook/', function (req, res) {
                 	}*/
                 	sendMoviesMessage(sender, movies);
                 });
-                continue
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
