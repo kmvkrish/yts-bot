@@ -28,6 +28,47 @@ function sendTextMessage(sender, text) {
     })
 }
 
+function sendMoviesMessage(sender, movies){
+	var message = {
+		"attachment": {
+			"type": "template",
+			"payload": {
+				"template_type": "generic",
+				"elements": []
+			}
+		}
+	};
+	for(var i=0; i< movies.length; i++){
+		message.attachment.payload.elements.push({
+			"title": movies[i].title,
+			"image_url": movies[i].background_image,
+			"subtitle": movies[i].description_full.substring(0, 50) + "...",
+			"buttons": [
+				{
+					"type": "web_url",
+					"url": movies[i].url,
+	                "title": "open link"
+				}
+			]
+		});
+	}
+	request({
+	    url: 'https://graph.facebook.com/v2.6/me/messages',
+	    qs: {access_token:token},
+	    method: 'POST',
+	    json: {
+	        recipient: {id:sender},
+	        message: messageData,
+	    }
+	}, function(error, response, body) {
+	    if (error) {
+	        console.log('Error sending messages: ', error)
+	    } else if (response.body.error) {
+	        console.log('Error: ', response.body.error)
+	    }
+	});
+}
+
 app.set('port', (process.env.PORT || 5000));
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -50,10 +91,12 @@ app.post('/webhook/', function (req, res) {
             if (text === 'List' || text == "list") {
                 yts.getMovies().then((response) => {
                 	var movies = response.body.data.movies;
-                	for(var i=0; i < movies.length; i++){
+                	/*for(var i=0; i < movies.length; i++){
                 		sendTextMessage(sender, movies[i].url);
-                	}
+                	}*/
+                	sendMoviesMessage(sender, movies);
                 });
+                continue
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
