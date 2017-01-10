@@ -7,10 +7,6 @@ var yts = require("./yts").yts;
 
 var token = "EAARms7g6rZAUBALWlSsazZCmL2mc8WZCHlfHNKPT2glmGS2aq5MGqfZAkUYDvdYYIZAw531L0FpHHvNhi38l8m13LHTWUKbp3CuLwUZAP1qn12dCinCPhBhQOkLYjl8UI5BgMtZANvsZAlCxEs777CUUoMGxDTX4sZCTWXEuKTcnzFgZDZD"
 
-function handleMessage(sender, text){
-	sendTextMessage(sender, text);
-}
-
 function sendTextMessage(sender, text) {
     messageData = {
         text:text
@@ -33,52 +29,44 @@ function sendTextMessage(sender, text) {
 }
 
 function sendGenericMessage(sender) {
-    messageData = {
-        "attachment": {
-            "type": "template",
-            "payload": {
-                "template_type": "generic",
-                "elements": [{
-                    "title": "First card",
-                    "subtitle": "Element #1 of an hscroll",
-                    "image_url": "http://messengerdemo.parseapp.com/img/rift.png",
-                    "buttons": [{
-                        "type": "web_url",
-                        "url": "https://www.messenger.com",
-                        "title": "web url"
-                    }, {
-                        "type": "postback",
-                        "title": "Postback",
-                        "payload": "Payload for first element in a generic bubble",
-                    }],
-                }, {
-                    "title": "Second card",
-                    "subtitle": "Element #2 of an hscroll",
-                    "image_url": "http://messengerdemo.parseapp.com/img/gearvr.png",
-                    "buttons": [{
-                        "type": "postback",
-                        "title": "Postback",
-                        "payload": "Payload for second element in a generic bubble",
-                    }],
-                }]
-            }
-        }
-    }
-    request({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token:token},
-        method: 'POST',
-        json: {
-            recipient: {id:sender},
-            message: messageData,
-        }
-    }, function(error, response, body) {
-        if (error) {
-            console.log('Error sending messages: ', error)
-        } else if (response.body.error) {
-            console.log('Error: ', response.body.error)
-        }
-    })
+	var movies = response.body.data.movies;
+		var messageData = {
+			"attachment": {
+				"type": "template",
+				"payload": {
+					"template_type": "generic",
+					"elements": []
+				}
+			}
+		};
+		for(var i=0; i< movies.length; i++){
+			messageData.attachment.payload.elements.push({
+				"title": movies[i].title,
+				"image_url": movies[i].background_image,
+				"buttons": [
+					{
+						"type": "postback",
+						"title": "Click to select",
+						"payload": movies[i].id
+					}
+				]
+			});
+		}
+	    request({
+	        url: 'https://graph.facebook.com/v2.6/me/messages',
+	        qs: {access_token:token},
+	        method: 'POST',
+	        json: {
+	            recipient: {id:sender},
+	            message: messageData,
+	        }
+	    }, function(error, response, body) {
+	        if (error) {
+	            console.log('Error sending messages: ', error)
+	        } else if (response.body.error) {
+	            console.log('Error: ', response.body.error)
+	        }
+	    });
 }
 
 app.set('port', (process.env.PORT || 5000));
@@ -88,8 +76,8 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
-    yts.getMovies().then((response) => {
-    	res.send(response.body.data);
+    yts.getMovies(1, 2016, 40).then((response) => {
+    	console.log(response.body.data);
     });
 });
 
@@ -100,8 +88,11 @@ app.post('/webhook/', function (req, res) {
         sender = event.sender.id
         if (event.message && event.message.text) {
             text = event.message.text
-            handleMessage(sender, text);
-            continue
+            if (text === 'List' || text == "list") {
+                sendGenericMessage(sender)
+                continue
+            }
+            //sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
         if (event.postback) {
             text = JSON.stringify(event.postback)
