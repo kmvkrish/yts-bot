@@ -91,10 +91,41 @@ app.post('/webhook/', function (req, res) {
             if (text === 'List' || text == "list") {
                 yts.getMovies().then((response) => {
                 	var movies = response.body.data.movies;
-                	/*for(var i=0; i < movies.length; i++){
-                		sendTextMessage(sender, movies[i].url);
-                	}*/
-                	sendMoviesMessage(sender, movies);
+                	for(var i=0; i < movies.length; i++){
+                		request({
+					        url: 'https://graph.facebook.com/v2.6/me/messages',
+					        qs: {access_token:token},
+					        method: 'POST',
+					        json: {
+					            recipient: {id:sender},
+					            message: {
+					            	"attachment": {
+							            "type": "template",
+							            "payload": {
+							                "template_type": "generic",
+							                "elements": [{
+							                    "title": movies[i].title,
+							                    "subtitle": movies[i].description_full,
+							                    "image_url": movies[i].background_image,
+							                    "buttons": [{
+							                        "type": "web_url",
+							                        "url": movies[i].url,
+							                        "title": "open link"
+							                    }],
+							                }]
+							            }
+							        }
+					            },
+					        }
+					    }, function(error, responseBody, body) {
+					        if (error) {
+					            console.log('Error sending messages: ', error)
+					        } else if (responseBody.body.error) {
+					            console.log('Error: ', responseBody.body.error)
+					        }
+					    });
+                	}
+                	
                 });
             }
             sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
