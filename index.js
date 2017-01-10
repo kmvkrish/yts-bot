@@ -29,7 +29,8 @@ function sendTextMessage(sender, text) {
 }
 
 function sendGenericMessage(sender) {
-	var movies = response.body.data.movies;
+	yts.getMovies().then((response) => {
+		var movies = response.body.data.movies;
 		var messageData = {
 			"attachment": {
 				"type": "template",
@@ -67,6 +68,7 @@ function sendGenericMessage(sender) {
 	            console.log('Error: ', response.body.error)
 	        }
 	    });
+	});
 }
 
 app.set('port', (process.env.PORT || 5000));
